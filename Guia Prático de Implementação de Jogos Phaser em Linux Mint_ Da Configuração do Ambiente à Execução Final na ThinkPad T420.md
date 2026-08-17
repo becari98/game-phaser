@@ -64,11 +64,7 @@ Vite, criado por Evan You (o criador do Vue.js), é um construtor de front-end e
 
 As vantagens do Vite em relação ao Webpack são notáveis em benchmarks de desempenho. Testes comparativos mostram que o servidor de desenvolvimento do Vite pode ser até 40 vezes mais rápido que o do Webpack, o HMR pode ser 68 vezes mais rápido, e as compilações de produção podem ser 21 vezes mais rápidas [[131](https://dev.to/themachinepulse/why-i-chose-vite-over-webpack-10x-faster-builds-instant-hmr-8fp)]. Para um desenvolvedor de jogos, onde o ciclo de iteração — escrever código, executar e observar o resultado — é fundamental, essa economia de tempo representa uma vantagem competitiva significativa. Por estas razões, a comunidade Phaser e os templates oficiais têm-se concentrado cada vez mais no suporte ao Vite [[25](https://phaser.io/news/2024/01/phaser-vite-typescript-template), [70](https://phaser.io/news/2024/01/phaser-vite-template), [71](https://github.com/phaserjs/template-vite)]. Dado que o objetivo deste guia é fornecer o caminho mais eficiente para a execução do projeto, o Vite é a escolha óbvia.
 
-O problema com `npm create phaser@latest` ocorre porque esse pacote foi descontinuado ou renomeado. A documentação oficial atualizada indica que a ferramenta correta agora é **`@phaserjs/game`**.
-
-Abaixo está o tutorial corrigido e adaptado especificamente para o seu ambiente (Linux Mint 22.3 / ThinkPad T420), utilizando o comando oficial vigente e alinhado à arquitetura do projeto "Guardiões da Escola".
-
-### 1. Criação Correta do Projeto Phaser + Vite
+### 1. Criação do Projeto Phaser + Vite
 
 No seu terminal, dentro do diretório onde deseja criar o projeto, execute:
 
@@ -192,9 +188,6 @@ Conforme a **Seção 30.1** do GDD, seu primeiro objetivo técnico é:
 > Criar perfil → iniciar protótipo da Fase 1 → interagir com um objeto → escolher uma ação → atualizar conduta → salvar → fechar → abrir → retomar.
 
 Comece implementando `src/data/LocalSaveRepository.js` e `src/domain/ScoreService.js` **antes** das cenas, pois eles são independentes de Phaser e testáveis com Vitest. Isso evita o risco R-02 (integração tardia).
-
-Este fluxo corrige o problema do comando obsoleto, alinha o template oficial à arquitetura do seu documento de visão e considera as limitações específicas do seu hardware.
-
 
 ## Configuração Avançada e Diagnóstico da Acoplhadora Gráfica (GPU)
 
