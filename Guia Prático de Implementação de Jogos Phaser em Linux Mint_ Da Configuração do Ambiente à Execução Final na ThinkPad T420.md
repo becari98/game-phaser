@@ -41,7 +41,12 @@ node -v  # Deve exibir a versão LTS, por exemplo, v24.x.x
 npm -v   # Deve exibir a versão do npm correspondente, por exemplo, 11.x.x
 ```
 
-Para maior praticidade e reprodutibilidade, é uma boa prática criar um ficheiro `.nvmrc` no diretório raiz do projeto. Este ficheiro simples contém o número da versão do Node.js que o projeto requer (por exemplo, `24`). Ao navegar para o diretório do projeto, o comando `nvm use` irá automaticamente detectar este ficheiro e alternar para a versão de Node.js especificada, garantindo que todos os desenvolvedores e ambientes de CI/CD utilizem a mesma versão [[44](https://linuxcapable.com/how-to-install-node-js-on-linux-mint/)]. A seguir, uma tabela resume os métodos de instalação de Node.js discutidos:
+Para maior praticidade e reprodutibilidade, é uma boa prática criar um ficheiro `.nvmrc` no diretório raiz do projeto. 
+```
+node -v > .nvmrc
+```
+
+Este ficheiro simples contém o número da versão do Node.js que o projeto requer (por exemplo, `24`). Ao navegar para o diretório do projeto, o comando `nvm use` irá automaticamente detectar este ficheiro e alternar para a versão de Node.js especificada, garantindo que todos os desenvolvedores e ambientes de CI/CD utilizem a mesma versão [[44](https://linuxcapable.com/how-to-install-node-js-on-linux-mint/)]. A seguir, uma tabela resume os métodos de instalação de Node.js discutidos:
 
 | Método de Instalação | Comando Principal | Gerenciamento de Versões | Impacto no Sistema | Recomendação |
 | :--- | :--- | :--- | :--- | :--- |
