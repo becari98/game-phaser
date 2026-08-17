@@ -41,7 +41,12 @@ node -v  # Deve exibir a versão LTS, por exemplo, v24.x.x
 npm -v   # Deve exibir a versão do npm correspondente, por exemplo, 11.x.x
 ```
 
-Para maior praticidade e reprodutibilidade, é uma boa prática criar um ficheiro `.nvmrc` no diretório raiz do projeto. Este ficheiro simples contém o número da versão do Node.js que o projeto requer (por exemplo, `24`). Ao navegar para o diretório do projeto, o comando `nvm use` irá automaticamente detectar este ficheiro e alternar para a versão de Node.js especificada, garantindo que todos os desenvolvedores e ambientes de CI/CD utilizem a mesma versão [[44](https://linuxcapable.com/how-to-install-node-js-on-linux-mint/)]. A seguir, uma tabela resume os métodos de instalação de Node.js discutidos:
+Para maior praticidade e reprodutibilidade, é uma boa prática criar um ficheiro `.nvmrc` no diretório raiz do projeto. 
+```
+node -v > .nvmrc
+```
+
+Este ficheiro simples contém o número da versão do Node.js que o projeto requer (por exemplo, `24`). Ao navegar para o diretório do projeto, o comando `nvm use` irá automaticamente detectar este ficheiro e alternar para a versão de Node.js especificada, garantindo que todos os desenvolvedores e ambientes de CI/CD utilizem a mesma versão [[44](https://linuxcapable.com/how-to-install-node-js-on-linux-mint/)]. A seguir, uma tabela resume os métodos de instalação de Node.js discutidos:
 
 | Método de Instalação | Comando Principal | Gerenciamento de Versões | Impacto no Sistema | Recomendação |
 | :--- | :--- | :--- | :--- | :--- |
@@ -59,44 +64,114 @@ Vite, criado por Evan You (o criador do Vue.js), é um construtor de front-end e
 
 As vantagens do Vite em relação ao Webpack são notáveis em benchmarks de desempenho. Testes comparativos mostram que o servidor de desenvolvimento do Vite pode ser até 40 vezes mais rápido que o do Webpack, o HMR pode ser 68 vezes mais rápido, e as compilações de produção podem ser 21 vezes mais rápidas [[131](https://dev.to/themachinepulse/why-i-chose-vite-over-webpack-10x-faster-builds-instant-hmr-8fp)]. Para um desenvolvedor de jogos, onde o ciclo de iteração — escrever código, executar e observar o resultado — é fundamental, essa economia de tempo representa uma vantagem competitiva significativa. Por estas razões, a comunidade Phaser e os templates oficiais têm-se concentrado cada vez mais no suporte ao Vite [[25](https://phaser.io/news/2024/01/phaser-vite-typescript-template), [70](https://phaser.io/news/2024/01/phaser-vite-template), [71](https://github.com/phaserjs/template-vite)]. Dado que o objetivo deste guia é fornecer o caminho mais eficiente para a execução do projeto, o Vite é a escolha óbvia.
 
-A forma mais rápida e recomendada de iniciar um novo projeto Phaser com Vite é utilizando a funcionalidade de criação de projetos do npm. O próprio Phaser disponibiliza um assistente de linha de comando que automatiza grande parte do processo de configuração. Abra o seu terminal, navegue até o diretório onde pretende criar o projeto e execute o seguinte comando:
+## 1. Criação do Projeto via CLI
+
+O instalador oficial interativo é a forma recomendada de iniciar um projeto Phaser moderno. Ele baixa o template correto e configura o bundler automaticamente.
+
+Execute o comando abaixo no seu terminal:
 
 ```bash
-npm create phaser@latest
+npm create @phaserjs/game@latest
 ```
 
-Este comando irá interagir com o utilizador, pedindo informações como o nome do projeto, a descrição, o autor, e permitindo a seleção de opções de configuração, incluindo a escolha do bundler. Durante o processo, será apresentada uma lista de bundlers, incluindo Vite. Selecione Vite para configurar o projeto com esta ferramenta. Alternativamente, se preferir um fluxo mais explícito, pode clonar um dos templates oficiais do Phaser no GitHub, que já estão pré-configurados para usar Vite. O template oficial mais recente pode ser encontrado no repositório `phaserjs/template-vite` [[71](https://github.com/phaserjs/template-vite), [73](https://docs.phaser.io/phaser/getting-started/project-templates)].
+### Seleções Recomendadas
+Durante o processo interativo, utilize as seguintes opções para garantir compatibilidade com o fluxo de trabalho padrão e JavaScript puro:
 
-Independentemente do método escolhido, o resultado será uma estrutura de diretórios padronizada e bem organizada. Uma análise detalhada desta estrutura é crucial para entender como o projeto funciona e onde encontrar os ficheiros relevantes:
+| Prompt | Seleção Recomendada | Justificativa |
+| :--- | :--- | :--- |
+| **Enter Project Name** | `game` (ou nome desejado) | Define o nome da pasta raiz do projeto. |
+| **Select Option** | `Web Bundler` | Categoria que agrupa os bundlers modernos. |
+| **Select Template** | `vite` | Bundler oficial recomendado pelo Phaser para dev rápido e HMR. |
+| **Minimal or Complete** | `Complete` | Inclui cenas comuns (Boot, Preload, Menu, Game) acelerando o setup inicial. |
+| **Development Language** | `JavaScript` | Alinhado ao stack definido; evita configuração extra de TS se não for obrigatório. |
+| **Anonymous Telemetry** | `Y` ou `N` | Opcional. Envia apenas dados anônimos sobre qual template foi usado. |
 
-*   **`src/`**: Este diretório contém todo o código-fonte do jogo. Dentro dele, encontramos:
-    *   `main.js`: Este é o ficheiro de ponto de entrada principal do jogo. Contém a lógica para inicializar a instância do Phaser.Game com as configurações adequadas.
-    *   `scenes/`: Cenários são a unidade primária de organização num jogo Phaser. Cada cena representa uma parte distinta do jogo, como a tela de menu, a tela de instruções, ou a própria fase de jogo. Por padrão, o template cria um ficheiro `Scene.js` neste diretório, que serve como um modelo para criar novas cenas.
-*   **`public/`**: Este diretório contém os ficheiros estáticos que serão servidos diretamente pelo servidor de desenvolvimento do Vite. O ficheiro principal aqui é:
-    *   `index.html`: Este é o ficheiro HTML que o navegador carrega. Ele contém o elemento `<canvas>` no qual o jogo será desenhado e as referências aos scripts JavaScript gerados pelo Vite.
-*   **`package.json`**: Este ficheiro é o coração do projeto Node.js. Ele registra o nome, versão e descrição do projeto, mas, mais importante, contém as dependências (`dependencies` e `devDependencies`), os scripts de utilidade (`scripts`) e as configurações específicas do projeto, como a versão do Phaser.
-*   **`vite.config.js`**: Este é o ficheiro de configuração do Vite. Embora o Vite funcione bem com as definições predefinidas, este ficheiro permite personalizar o comportamento do servidor de desenvolvimento, adicionar plug-ins e definir variáveis de ambiente.
-*   **`dist/`**: Este diretório é gerado automaticamente quando se cria uma compilação de produção. Contém os ficheiros HTML, CSS e JavaScript otimizados, minificados e preparados para serem implantados num servidor web.
+> ⚠️ **Nota sobre Aviso de Depreciação:** Durante a instalação, você pode ver o aviso `npm warn deprecated node-domexception@1.0.0`. Isso é seguro e esperado; trata-se de uma dependência transitória interna do instalador que não afeta o runtime do seu jogo ou a segurança do projeto.
 
-Após a criação da estrutura do projeto, o passo seguinte é instalar todas as dependências listadas no `package.json`. Isso é feito com um único comando no diretório raiz do projeto:
+## 2. Instalação de Dependências
+
+Após o download do template, é necessário instalar as bibliotecas locais. O template já vem com o `package.json` configurado para Phaser 4.x e Vite 6.x.
 
 ```bash
+cd game
 npm install
 ```
 
-Este comando lerá o `package.json`, baixará todas as dependências listadas em `devDependencies` (como o Phaser, o Vite e seus plug-ins) e as instalará na pasta `node_modules`.
+Este comando instalará:
+-   **Phaser 4.0.0+**: Motor de jogo principal.
+-   **Vite 6.3.1+**: Servidor de desenvolvimento e bundler de produção.
+-   **Dependências de Build**: Plugins do Vite e utilitários de log anônimo (opcionais).
 
-Abaixo está uma tabela comparativa que ilustra a diferença entre os fluxos de trabalho com Vite e Webpack, destacando por que o Vite é a escolha superior para este tutorial:
+## 3. Execução do Ambiente de Desenvolvimento
 
-| Característica | Vite | Webpack | Justificação para Vite |
-| :--- | :--- | :--- | :--- |
-| **Inicialização do Servidor** | Instantâneo (serve módulos ESM nativos) [[118](https://www.youtube.com/watch?v=ByG1WnUZDog)] | Lenta (requer bundling completo do projeto) [[157](https://dev.to/abhinav_sharma_e01f930be6/vite-vs-webpack-which-one-is-right-for-your-project-886)] | Reduz drasticamente o tempo de espera antes de começar a codificar. |
-| **Hot Module Replacement (HMR)** | Extremamente rápido (<50ms), com estado preservado [[157](https://dev.to/abhinav_sharma_e01f930be6/vite-vs-webpack-which-one-is-right-for-your-project-886)] | Mais lento (100-500ms), pode ser menos preciso [[157](https://dev.to/abhinav_sharma_e01f930be6/vite-vs-webpack-which-one-is-right-for-your-project-886)] | Aumenta a produtividade do desenvolvedor ao fornecer feedback imediato. |
-| **Build de Produção** | Rápido e otimizado por padrão [[131](https://dev.to/themachinepulse/why-i-chose-vite-over-webpack-10x-faster-builds-instant-hmr-8fp)] | Pode ser configurado para ser rápido, mas requer mais esforço | Entrega builds de produção eficientes com menos configuração. |
-| **Complexidade de Configuração** | Baixa (configuração mínima necessária) [[72](https://flaviocopes.com/phaser-setup/)] | Alta (requer configuração complexa para cenários avançados) | Ideal para iniciantes e para projetos que não precisam de customizações extensas. |
-| **Ecossistema de Plug-ins** | Crescente e moderno [[127](https://2024.stateofjs.com/en-US/libraries/build_tools/)] | Muito vasto e maduro [[85](https://www.youtube.com/watch?v=i9Xq8aExZr4)] | Para novos projetos, o ecossistema do Vite é suficiente e mais fácil de usar. |
+Inicie o servidor local com Hot Module Replacement (HMR):
 
-Em resumo, a criação da estrutura do projeto com Vite não é apenas um passo preliminar, mas uma decisão estratégica que molda toda a experiência de desenvolvimento. Ao adotar o Vite, o desenvolvedor alavancará as vantagens da arquitetura moderna do navegador, garantindo um fluxo de trabalho ágil, responsivo e focado na criação de conteúdo de jogo, em vez de na configuração de ferramentas. A estrutura gerada pelo `npm create phaser@latest` fornece um ponto de partida sólido e limpo, pronto para a implementação da lógica do jogo.
+```bash
+npm run dev
+```
+
+O servidor estará disponível em `http://localhost:8080`. Qualquer alteração nos arquivos dentro de `src/` recarregará o navegador automaticamente sem perder o estado do jogo quando possível.
+
+### Comandos Disponíveis
+
+| Comando | Descrição |
+| :--- | :--- |
+| `npm run dev` | Inicia servidor de desenvolvimento com telemetry. |
+| `npm run dev-nolog` | Inicia servidor de desenvolvimento **sem** envio de dados anônimos. |
+| `npm run build` | Gera build de produção otimizada na pasta `dist/`. |
+| `npm run build-nolog` | Gera build de produção sem envio de dados anônimos. |
+
+## 4. Estrutura de Pastas do Template Oficial
+
+O template "Complete" com Vite gera a seguinte estrutura padronizada:
+
+```text
+game/
+├── index.html          # Ponto de entrada HTML
+├── package.json        # Dependências e scripts
+├── public/
+│   ├── assets/         # Arquivos estáticos (sprites, áudio) servidos diretamente
+│   └── style.css       # Estilos globais de layout
+├── src/
+│   ├── main.js         # Bootstrap da aplicação
+│   └── game/
+│       ├── main.js     # Configuração e inicialização do Phaser.Game
+│       └── scenes/     # Cenas do jogo (Boot, Preload, Menu, etc.)
+└── vite/               # Configurações específicas do Vite
+```
+
+### Gestão de Assets
+O template suporta dois métodos de carregamento:
+
+1.  **Importação ES6 (Recomendado para imagens pequenas/UI):**
+    ```javascript
+    import logoImg from './assets/logo.png';
+    this.load.image('logo', logoImg);
+    ```
+2.  **Pasta Pública (Recomendado para áudio/vídeo/assets pesados):**
+    Coloque em `public/assets/` e referencie pelo caminho relativo:
+    ```javascript
+    this.load.image('background', 'assets/bg.png');
+    ```
+
+## 5. Privacidade e Telemetria (`log.js`)
+
+O template inclui um arquivo `log.js` que envia dados anônimos (nome do template, tipo de build e versão do Phaser) para `gryzor.co` (domínio da Phaser Studio). **Nenhum dado pessoal ou código-fonte é coletado.**
+
+Se desejar desativar completamente:
+1.  Delete o arquivo `log.js`.
+2.  Edite o `package.json` e remova a chamada `node log.js` dos scripts `dev` e `build`.
+
+Ou simplesmente utilize os comandos `-nolog` fornecidos pelo template.
+
+## 6. Próximos Passos Imediatos
+
+Com o ambiente instalado e rodando:
+1.  Verifique se o HMR está funcionando editando uma cena em `src/game/scenes/`.
+2.  Confirme que os assets em `public/assets/` estão sendo servidos corretamente.
+3.  Execute `npm run build` para validar que a geração de produção funciona sem erros antes de iniciar o desenvolvimento das regras de negócio.
+
+Este setup garante que você está utilizando a stack oficial mais recente, com todas as otimizações de performance e DX (Developer Experience) previstas pelos mantenedores do Phaser.
 
 ## Configuração Avançada e Diagnóstico da Acoplhadora Gráfica (GPU)
 
