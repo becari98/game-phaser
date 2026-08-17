@@ -64,130 +64,114 @@ Vite, criado por Evan You (o criador do Vue.js), é um construtor de front-end e
 
 As vantagens do Vite em relação ao Webpack são notáveis em benchmarks de desempenho. Testes comparativos mostram que o servidor de desenvolvimento do Vite pode ser até 40 vezes mais rápido que o do Webpack, o HMR pode ser 68 vezes mais rápido, e as compilações de produção podem ser 21 vezes mais rápidas [[131](https://dev.to/themachinepulse/why-i-chose-vite-over-webpack-10x-faster-builds-instant-hmr-8fp)]. Para um desenvolvedor de jogos, onde o ciclo de iteração — escrever código, executar e observar o resultado — é fundamental, essa economia de tempo representa uma vantagem competitiva significativa. Por estas razões, a comunidade Phaser e os templates oficiais têm-se concentrado cada vez mais no suporte ao Vite [[25](https://phaser.io/news/2024/01/phaser-vite-typescript-template), [70](https://phaser.io/news/2024/01/phaser-vite-template), [71](https://github.com/phaserjs/template-vite)]. Dado que o objetivo deste guia é fornecer o caminho mais eficiente para a execução do projeto, o Vite é a escolha óbvia.
 
-### 1. Criação do Projeto Phaser + Vite
+## 1. Criação do Projeto via CLI
 
-No seu terminal, dentro do diretório onde deseja criar o projeto, execute:
+O instalador oficial interativo é a forma recomendada de iniciar um projeto Phaser moderno. Ele baixa o template correto e configura o bundler automaticamente.
+
+Execute o comando abaixo no seu terminal:
 
 ```bash
-npm create @phaserjs/game@latest guardioes-da-escola
+npm create @phaserjs/game@latest
 ```
 
-Quando o assistente interativo iniciar, selecione as seguintes opções para garantir compatibilidade com o GDD e performance na sua GPU Intel HD 3000:
+### Seleções Recomendadas
+Durante o processo interativo, utilize as seguintes opções para garantir compatibilidade com o fluxo de trabalho padrão e JavaScript puro:
 
-1.  **Select a template:** Escolha **Web Bundler** (não selecione frameworks como React/Vue, pois o GDD especifica Phaser puro com JS ES6+).
-2.  **Select a bundler:** Escolha **Vite** (conforme seção 19.2 do documento de visão).
-3.  **Language:** Escolha **JavaScript** (o GDD não exige TypeScript e JS reduz a complexidade inicial para o prazo de 6 semanas).
-4.  **Demo Game:** Selecione **None / Empty Template** (você construirá a estrutura do zero conforme a seção 19.4 do GDD; demos adicionam código desnecessário).
+| Prompt | Seleção Recomendada | Justificativa |
+| :--- | :--- | :--- |
+| **Enter Project Name** | `game` (ou nome desejado) | Define o nome da pasta raiz do projeto. |
+| **Select Option** | `Web Bundler` | Categoria que agrupa os bundlers modernos. |
+| **Select Template** | `vite` | Bundler oficial recomendado pelo Phaser para dev rápido e HMR. |
+| **Minimal or Complete** | `Complete` | Inclui cenas comuns (Boot, Preload, Menu, Game) acelerando o setup inicial. |
+| **Development Language** | `JavaScript` | Alinhado ao stack definido; evita configuração extra de TS se não for obrigatório. |
+| **Anonymous Telemetry** | `Y` ou `N` | Opcional. Envia apenas dados anônimos sobre qual template foi usado. |
 
-> ⚠️ **Nota Importante sobre Versões:** O README do template base menciona Phaser 4.0.0, mas o Documento de Visão do projeto (seção 19.1) especifica **Phaser 3**. Após a criação, verifique o `package.json`. Se vier com Phaser 4, faça o downgrade para manter conformidade com o planejamento acadêmico:
-> ```bash
-> cd guardioes-da-escola
-> npm install phaser@3
-> ```
+> ⚠️ **Nota sobre Aviso de Depreciação:** Durante a instalação, você pode ver o aviso `npm warn deprecated node-domexception@1.0.0`. Isso é seguro e esperado; trata-se de uma dependência transitória interna do instalador que não afeta o runtime do seu jogo ou a segurança do projeto.
 
-### 2. Instalação de Dependências e Ferramentas Complementares
+## 2. Instalação de Dependências
 
-Com o projeto criado, instale as dependências base e as ferramentas recomendadas na seção 19.2 do GDD:
+Após o download do template, é necessário instalar as bibliotecas locais. O template já vem com o `package.json` configurado para Phaser 4.x e Vite 6.x.
 
 ```bash
-# Instala dependências do template
+cd game
 npm install
-
-# Instala Electron para empacotamento desktop (RNF-03 e RNF-14)
-npm install --save-dev electron electron-builder
-
-# Instala Vitest para testes unitários de regras de domínio (Seção 25.1)
-npm install --save-dev vitest
 ```
 
-### 3. Estruturação de Pastas Conforme Arquitetura em Camadas
+Este comando instalará:
+-   **Phaser 4.0.0+**: Motor de jogo principal.
+-   **Vite 6.3.1+**: Servidor de desenvolvimento e bundler de produção.
+-   **Dependências de Build**: Plugins do Vite e utilitários de log anônimo (opcionais).
 
-O template oficial cria uma estrutura genérica (`src/game/scenes`). Você deve reorganizá-la para atender à **Seção 19.4** do documento de visão. Execute os comandos abaixo na raiz do projeto:
+## 3. Execução do Ambiente de Desenvolvimento
 
-```bash
-# Cria camadas de domínio, serviços, dados e conteúdo
-mkdir -p src/domain src/services src/data src/content src/ui
-
-# Move cenas para a pasta correta (ajuste se o template criou src/game/scenes)
-# Se o template usou src/game/scenes, mova para src/scenes:
-mv src/game/scenes src/scenes 2>/dev/null || true
-
-# Remove pasta game genérica se estiver vazia após a movimentação
-rm -rf src/game 2>/dev/null || true
-
-# Cria pastas de assets organizadas (Seção 18.5)
-mkdir -p public/assets/images/characters
-mkdir -p public/assets/images/tiles
-mkdir -p public/assets/images/ui
-mkdir -p public/assets/audio/music
-mkdir -p public/assets/audio/sfx
-mkdir -p public/assets/fonts
-mkdir -p docs/licenses
-```
-
-### 4. Configuração do Vite para Phaser 3 e Persistência Local
-
-Edite o arquivo `vite/config.*.mjs` (ou `vite.config.js`) para garantir que o build funcione offline (RNF-04) e que o localStorage seja acessível corretamente no Electron:
-
-```javascript
-import { defineConfig } from 'vite';
-
-export default defineConfig({
-    base: './', // Garante caminhos relativos para funcionar em file:// e Electron
-    build: {
-        target: 'es2015', // Compatível com navegadores mais antigos em PCs escolares
-        outDir: 'dist',
-        assetsInlineLimit: 0 // Força assets a serem arquivos separados (melhor para cache)
-    },
-    server: {
-        port: 8080,
-        open: true
-    }
-});
-```
-
-### 5. Scripts NPM Alinhados ao Fluxo de Desenvolvimento
-
-Atualize a seção `"scripts"` do seu `package.json` para incluir os comandos de teste e build desktop previstos no GDD:
-
-```json
-"scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview",
-    "test": "vitest run",
-    "test:watch": "vitest",
-    "electron:dev": "vite build && electron .",
-    "electron:build": "vite build && electron-builder"
-}
-```
-
-### 6. Validação Inicial na ThinkPad T420
-
-Antes de escrever qualquer lógica de jogo, valide que o ambiente funciona na sua GPU Intel HD 3000:
+Inicie o servidor local com Hot Module Replacement (HMR):
 
 ```bash
 npm run dev
 ```
 
-Abra `http://localhost:8080` e verifique:
--   Se o canvas renderiza sem erros no console.
--   Se não houver renderização, force o modo Canvas no `src/main.js`:
+O servidor estará disponível em `http://localhost:8080`. Qualquer alteração nos arquivos dentro de `src/` recarregará o navegador automaticamente sem perder o estado do jogo quando possível.
+
+### Comandos Disponíveis
+
+| Comando | Descrição |
+| :--- | :--- |
+| `npm run dev` | Inicia servidor de desenvolvimento com telemetry. |
+| `npm run dev-nolog` | Inicia servidor de desenvolvimento **sem** envio de dados anônimos. |
+| `npm run build` | Gera build de produção otimizada na pasta `dist/`. |
+| `npm run build-nolog` | Gera build de produção sem envio de dados anônimos. |
+
+## 4. Estrutura de Pastas do Template Oficial
+
+O template "Complete" com Vite gera a seguinte estrutura padronizada:
+
+```text
+game/
+├── index.html          # Ponto de entrada HTML
+├── package.json        # Dependências e scripts
+├── public/
+│   ├── assets/         # Arquivos estáticos (sprites, áudio) servidos diretamente
+│   └── style.css       # Estilos globais de layout
+├── src/
+│   ├── main.js         # Bootstrap da aplicação
+│   └── game/
+│       ├── main.js     # Configuração e inicialização do Phaser.Game
+│       └── scenes/     # Cenas do jogo (Boot, Preload, Menu, etc.)
+└── vite/               # Configurações específicas do Vite
+```
+
+### Gestão de Assets
+O template suporta dois métodos de carregamento:
+
+1.  **Importação ES6 (Recomendado para imagens pequenas/UI):**
     ```javascript
-    const config = {
-        type: Phaser.CANVAS, // Fallback seguro para Intel HD 3000
-        width: 1280,
-        height: 720,
-        // ... demais configs
-    };
+    import logoImg from './assets/logo.png';
+    this.load.image('logo', logoImg);
+    ```
+2.  **Pasta Pública (Recomendado para áudio/vídeo/assets pesados):**
+    Coloque em `public/assets/` e referencie pelo caminho relativo:
+    ```javascript
+    this.load.image('background', 'assets/bg.png');
     ```
 
-### 7. Próximo Passo Imediato (Fluxo Vertical da Sprint 1)
+## 5. Privacidade e Telemetria (`log.js`)
 
-Conforme a **Seção 30.1** do GDD, seu primeiro objetivo técnico é:
-> Criar perfil → iniciar protótipo da Fase 1 → interagir com um objeto → escolher uma ação → atualizar conduta → salvar → fechar → abrir → retomar.
+O template inclui um arquivo `log.js` que envia dados anônimos (nome do template, tipo de build e versão do Phaser) para `gryzor.co` (domínio da Phaser Studio). **Nenhum dado pessoal ou código-fonte é coletado.**
 
-Comece implementando `src/data/LocalSaveRepository.js` e `src/domain/ScoreService.js` **antes** das cenas, pois eles são independentes de Phaser e testáveis com Vitest. Isso evita o risco R-02 (integração tardia).
+Se desejar desativar completamente:
+1.  Delete o arquivo `log.js`.
+2.  Edite o `package.json` e remova a chamada `node log.js` dos scripts `dev` e `build`.
+
+Ou simplesmente utilize os comandos `-nolog` fornecidos pelo template.
+
+## 6. Próximos Passos Imediatos
+
+Com o ambiente instalado e rodando:
+1.  Verifique se o HMR está funcionando editando uma cena em `src/game/scenes/`.
+2.  Confirme que os assets em `public/assets/` estão sendo servidos corretamente.
+3.  Execute `npm run build` para validar que a geração de produção funciona sem erros antes de iniciar o desenvolvimento das regras de negócio.
+
+Este setup garante que você está utilizando a stack oficial mais recente, com todas as otimizações de performance e DX (Developer Experience) previstas pelos mantenedores do Phaser.
 
 ## Configuração Avançada e Diagnóstico da Acoplhadora Gráfica (GPU)
 
